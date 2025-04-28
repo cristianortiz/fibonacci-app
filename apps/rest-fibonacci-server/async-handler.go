@@ -44,8 +44,10 @@ func (ns *AsyncStore) Read() ([]int, int, int) {
 	return readNumbers, ns.current, ns.requestedRange
 }
 
+// calculates async fibo series based on client reuqest, the server also streams the results to clients as the
+// becomes avalaible
 func (a *App) fibonacciAsyncHandler(w http.ResponseWriter, r *http.Request) {
-
+	//extract the value of the number from the request and perform error checking
 	vars := mux.Vars(r)
 	number := vars["number"]
 	numFibonacci, err := strconv.Atoi(number)
@@ -54,15 +56,19 @@ func (a *App) fibonacciAsyncHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	headers := r.Header
+	//extract request-id from http headers, helps to maintain the state of the ongoing calculations
+	//for each client
 	reqId := headers.Get("request-id")
 	if strings.TrimSpace(reqId) == "" {
 		http.Error(w, "no request id in request", http.StatusBadRequest)
 		return
 	}
-
+	//checks if an AsyncStore object exists for the given request-id
+	//if not, creates a new one
 	if _, ok := a.asyncStores[reqId]; !ok {
-		fmt.Println("creating new store for reqId %s\n", reqId)
+		fmt.Println("creating new store for reqId", reqId)
 		a.asyncStores[reqId] = NewAsyncStore(numFibonacci)
+		//go routine launched to perform the fibo calculations concurrently
 		go a.fibAsync(numFibonacci, reqId)
 	}
 
