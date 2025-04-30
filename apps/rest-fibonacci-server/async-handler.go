@@ -71,10 +71,13 @@ func (a *App) fibonacciAsyncHandler(w http.ResponseWriter, r *http.Request) {
 		//go routine launched to perform the fibo calculations concurrently
 		go a.fibAsync(numFibonacci, reqId)
 	}
-
+	//reads results from AsyncStore, numbersNow, is already computed numbers, current  is last fibo number computed
+	// , 'requested' target range
 	numbersNow, current, requested := a.asyncStores[reqId].Read()
 	fmt.Printf("read fibs reqId %s till current %d and numbers are: %v\n", reqId, current, numbersNow)
 	end := false
+	//if current number equals tje requested change, the fibo calculation is complete and endOfResponse will be
+	//set to true in response object
 	if current == requested {
 		end = true
 		delete(a.asyncStores, reqId)
@@ -96,7 +99,7 @@ func (a *App) fibonacciAsyncHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 func (a *App) fibAsync(n int, reqId string) {
-	for i := 0; i < n; i++ {
+	for i := range n {
 		fmt.Printf("for %s computing and writing fib of %d\n", reqId, i)
 		a.asyncStores[reqId].Write(fib(i), i)
 	}

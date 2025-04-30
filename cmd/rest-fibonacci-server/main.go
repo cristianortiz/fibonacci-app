@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	restfibonacciserver "github.com/cristianortiz/fibonacci-app/apps/rest-fibonacci-server"
+)
 
 func main() {
-	fmt.Println("this is rest fibo server")
+	app := restfibonacciserver.NewApp()
+	app.Start()
 }

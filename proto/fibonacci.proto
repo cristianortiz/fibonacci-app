@@ -1,0 +1,25 @@
+syntax ="proto3";
+package proto;
+option go_package="./proto";
+
+//int32 parameter for both RPCs services methods to specify fibo numbers to be generate
+message FibonacciRequest {
+    int32 number = 1;
+}
+//message returned by the syncFibonacci RPC method
+message SyncFibonacciResponse {
+    string timeTaken =1;
+    repeated int32 fibonaccinNumbers = 2;
+}
+
+message AsyncFibonacciResponse {
+    int32 sequence = 1; //sequence position of the fibo number
+    int32 fibonacciNumber = 2; //actual fibo number
+}
+
+service FibonacciService{
+    //unary
+    rpc SyncFibonacci(FibonacciRequest) returns (SyncFibonacciResponse){};
+    //server streaming
+    rpc AsyncFibonacci(FibonacciRequest) returns (stream AsyncFibonacciResponse) {};
+}
